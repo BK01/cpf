@@ -1,5 +1,5 @@
 node ('master'){
-  def gitProjectUrl = 'https://github.com/bcgov/ca.bc.gov.open.cpf.git'
+  def gitProjectUrl = 'https://github.com/bcgov/cpf.git'
 
   def artifactoryServer = Artifactory.server 'prod'
   def mavenRuntime = Artifactory.newMavenBuild()
