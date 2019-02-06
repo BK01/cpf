@@ -30,7 +30,7 @@ def setVersion(folderName, prefix) {
   }
   dir(folderName) {
     sh "git checkout -B version-${tagName}"
-    withMaven(jdk: 'jdk', maven: 'm3') {
+    withMaven(jdk: 'jdk-8', maven: 'm3') {
       sh "mvn versions:set -DnewVersion='${tagName}' -DgenerateBackupPoms=false"
     }
     sh 'sed -i "s/<com.revolsys.open.version>.*<\\/com.revolsys.open.version>/<com.revolsys.open.version>CPF-${gitTag}<\\/com.revolsys.open.version>/g" pom.xml'
