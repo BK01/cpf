@@ -73,7 +73,7 @@ git config --global user.name "Paul Austin"
   }
 
   stage ('Tag') {
-    tagVersion('revolsys', 'BCDEM');
+    tagVersion('revolsys', 'CPF');
     tagVersion('cpf', null);
   }
 }
