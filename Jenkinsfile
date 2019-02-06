@@ -35,6 +35,9 @@ def artifactoryDeploy(folderName, artifactoryServer, mavenRuntime, buildInfo) {
 }
 
 node ('master') {
+  jdk = tool name: 'jdk-8'
+  env.JAVA_HOME = "${jdk}"
+
   def artifactoryServer = Artifactory.server 'prod'
   def mavenRuntime = Artifactory.newMavenBuild()
   def buildInfo
