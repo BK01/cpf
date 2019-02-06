@@ -1,79 +1,64 @@
 // parameters
 // ----------
-// rsBranch
-// cpfBranch
 // gitTag
 
 def replace = { File source, String toSearch, String replacement ->
   source.write(source.text.replaceAll(toSearch, replacement))
 }
     
-def checkoutBranch(folderName, url, branchName) {
+def checkoutTag(folderName, url, tagName) {
   dir(folderName) {
     deleteDir()
     checkout([
-      $class: 'GitSCM',
-      branches: [[name: branchName]],
-      doGenerateSubmoduleConfigurations: false,
-      extensions: [],
-      gitTool: 'Default',
-      submoduleCfg: [],
-      userRemoteConfigs: [[url: url]]
+       $class: 'GitSCM', 
+        branches: [[name: "refs/tags/${tagName}"]],
+        doGenerateSubmoduleConfigurations: false,
+        extensions: [],
+        gitTool: 'Default',
+        submoduleCfg: [],
+        userRemoteConfigs: [[url: url]]
     ])
   }
 }
 
-def setVersion(folderName, prefix) {
-  def tagName = "${gitTag}";
-  if (prefix != null) {
-    tagName = "${prefix}-${gitTag}";
-  }
-  dir(folderName) {
-    sh "git checkout -B version-${tagName}"
-    withMaven(jdk: 'jdk-8', maven: 'm3') {
-      sh "mvn versions:set -DnewVersion='${tagName}' -DgenerateBackupPoms=false"
-    }
-    sh 'sed -i "s/<com.revolsys.open.version>.*<\\/com.revolsys.open.version>/<com.revolsys.open.version>CPF-${gitTag}<\\/com.revolsys.open.version>/g" pom.xml'
+def build(folderName, mavenRuntime, buildInfo) {
+  dir (path: folderName) {
+    mavenRuntime.run pom: 'pom.xml', goals: 'install', buildInfo: buildInfo
   }
 }
 
-def tagVersion(folderName, prefix) {
-  def tagName = "${gitTag}";
-  if (prefix != null) {
-    tagName = "${prefix}-${gitTag}";
-  }
-  dir(folderName) {
-    sh """
-git commit -a -m "Version ${tagName}"
-git tag -f -a ${tagName} -m "Version ${tagName}"
-git push origin ${tagName}
-    """
+def artifactoryDeploy(folderName, artifactoryServer, mavenRuntime, buildInfo) {
+  dir (path: folderName) {
+    mavenRuntime.deployer.deployArtifacts buildInfo
+    artifactoryServer.publishBuildInfo buildInfo
   }
 }
 
 node ('master') {
-  def rtMaven = Artifactory.newMavenBuild()
+  def artifactoryServer = Artifactory.server 'prod'
+  def mavenRuntime = Artifactory.newMavenBuild()
   def buildInfo
 
-  stage ('SCM globals') {
-     sh '''
-git config --global user.email "paul.austin@revolsys.com"
-git config --global user.name "Paul Austin"
-     '''
+  stage ('Artifactory configuration') {
+    mavenRuntime.tool = 'm3' 
+    mavenRuntime.deployer releaseRepo: 'libs-release-local', snapshotRepo: 'libs-snapshot-local', server: artifactoryServer
+    mavenRuntime.resolver releaseRepo: 'repo', snapshotRepo: 'repo', server: artifactoryServer
+    mavenRuntime.deployer.deployArtifacts = false
+    buildInfo = Artifactory.newBuildInfo()
   }
 
   stage ('Checkout') {
-    checkoutBranch('revolsys', 'ssh://git@github.com/revolsys/com.revolsys.open.git', '${rsBranch}');
-    checkoutBranch('cpf', 'ssh://git@github.com/revolsys/ca.bc.gov.open.cpf.git', '${cpfBranch}');
+    checkoutTag('revolsys', 'ssh://git@github.com/revolsys/com.revolsys.open.git', 'CPF-${gitTag}');
+    checkoutTag('cpf', 'ssh://git@github.com/revolsys/ca.bc.gov.open.cpf.git', '${gitTag}');
   }
 
-  stage ('Set Project Versions') {
-    setVersion('revolsys', 'CPF');
-    setVersion('cpf', null);
+  stage ('Maven Install') {
+    build('revolsys', mavenRuntime, buildInfo);
+    build('cpf', mavenRuntime, buildInfo);
   }
 
-  stage ('Tag') {
-    tagVersion('revolsys', 'CPF');
-    tagVersion('cpf', null);
+  stage ('Artifactory Deploy') {
+    artifactoryDeploy('revolsys', artifactoryServer, mavenRuntime, buildInfo);
+    artifactoryDeploy('cpf', artifactoryServer, mavenRuntime, buildInfo);
   }
 }
