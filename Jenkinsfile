@@ -30,7 +30,7 @@ def build(folderName, mavenRuntime, buildInfo) {
 def artifactoryDeploy(folderName, artifactoryServer, mavenRuntime, buildInfo) {
   dir (path: folderName) {
     mavenRuntime.deployer.deployArtifacts buildInfo
-    artifactoryServer.publishBuildInfo buildInfo
+//    artifactoryServer.publishBuildInfo buildInfo
   }
 }
 
