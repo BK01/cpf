@@ -30,7 +30,7 @@ node ('master'){
 
   stage ('Maven Install') {
     dir (path: 'scm-checkout') {
-      mavenRuntime.run pom: 'pom.xml', goals: 'dependency:purge-local-repository clean install', buildInfo: buildInfo
+      mavenRuntime.run pom: 'pom.xml', goals: 'clean install', buildInfo: buildInfo
     }
   }
 
