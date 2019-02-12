@@ -44,10 +44,9 @@ git config --global user.name "Paul Austin"
     def tagName = "BCGOV-${cpfVersion}-RELEASE";
     dir('bcgov-cpf') {
       sh """
-git checkout -B '${bcgovCpfBranch}'
+git checkout -B 'version-${bcgovCpfBranch}'
 git commit -a -m "Version ${releaseVersion}"
 git tag -f -a ${tagName} -m "Version ${releaseVersion}"
-git push 'ssh://git@github.com/bcgov/cpf.git'
 git push 'ssh://git@github.com/bcgov/cpf.git' ${tagName}
       """
     }
