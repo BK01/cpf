@@ -36,7 +36,7 @@ git config --global user.name "Paul Austin"
       withMaven(jdk: 'jdk-8', maven: 'm3') {
         sh "mvn versions:set -DnewVersion='${cpfBcgovVersion}' -DgenerateBackupPoms=false"
       }
-      sh `sed -i "s/<ca.bc.gov.open.cpf.version>.*<\\/ca.bc.gov.open.cpf.version>/<ca.bc.gov.open.cpf.version>${cpfOpenVersion}<\\/ca.bc.gov.open.cpf.version>/g" pom.xml`
+      sh "sed -i "s/<ca.bc.gov.open.cpf.version>.*<\\/ca.bc.gov.open.cpf.version>/<ca.bc.gov.open.cpf.version>${cpfOpenVersion}<\\/ca.bc.gov.open.cpf.version>/g" pom.xml"
     }
   }
 
