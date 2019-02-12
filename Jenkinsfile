@@ -30,23 +30,24 @@ git config --global user.name "Paul Austin"
   }
 
   stage ('Set Project Versions') {
-    def releaseVersion = "${cpfVersion}-RELEASE";
+    def cpfBcgovVersion = "${cpfVersion}-RC";
+    def cpfOpenVersion = "${cpfVersion}-RELEASE";
     dir('bcgov-cpf') {
       withMaven(jdk: 'jdk-8', maven: 'm3') {
-        sh "mvn versions:set -DnewVersion='${releaseVersion}' -DgenerateBackupPoms=false"
+        sh "mvn versions:set -DnewVersion='${cpfBcgovVersion}' -DgenerateBackupPoms=false"
       }
-      sh 'sed -i "s/<ca.bc.gov.open.cpf.version>.*<\\/ca.bc.gov.open.cpf.version>/<ca.bc.gov.open.cpf.version>${releaseVersion}<\\/ca.bc.gov.open.cpf.version>/g" pom.xml'
+      sh 'sed -i "s/<ca.bc.gov.open.cpf.version>.*<\\/ca.bc.gov.open.cpf.version>/<ca.bc.gov.open.cpf.version>${cpfOpenVersion}<\\/ca.bc.gov.open.cpf.version>/g" pom.xml'
     }
   }
 
   stage ('Tag') {
-    def releaseVersion = "${cpfVersion}-RELEASE";
-    def tagName = "BCGOV-${cpfVersion}-RELEASE";
+    def cpfBcgovVersion = "${cpfVersion}-RC";
+    def tagName = "BCGOV-${cpfBcgovVersion}";
     dir('bcgov-cpf') {
       sh """
-git checkout -B 'version-${bcgovCpfBranch}'
-git commit -a -m "Version ${releaseVersion}"
-git tag -f -a ${tagName} -m "Version ${releaseVersion}"
+git checkout -B 'version-${cpfBcgovVersion}'
+git commit -a -m "Version ${cpfBcgovVersion}"
+git tag -f -a ${tagName} -m "Version ${cpfBcgovVersion}"
 git push 'ssh://git@github.com/bcgov/cpf.git' ${tagName}
       """
     }
