@@ -41,7 +41,7 @@ git config --global user.name "Paul Austin"
 
   stage ('Tag') {
     def releaseVersion = "${cpfVersion}-RELEASE";
-    def tagName = "${cpfVersion}-BCGOV-RELEASE";
+    def tagName = "BCGOV-${cpfVersion}-RELEASE";
     dir('bcgov-cpf') {
       sh """
 git checkout -B '${bcgovCpfBranch}'
