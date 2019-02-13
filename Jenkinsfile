@@ -48,6 +48,7 @@ git config --global user.name "Paul Austin"
 git checkout -B 'version-${cpfBcgovVersion}'
 git commit -a -m "Version ${cpfBcgovVersion}"
 git tag -f -a ${tagName} -m "Version ${cpfBcgovVersion}"
+git push -f 'ssh://git@github.com/revolsys/ca.bc.gov.open.cpf.git' ${tagName}
 git push -f 'ssh://git@github.com/bcgov/cpf.git' ${tagName}
       """
     }
